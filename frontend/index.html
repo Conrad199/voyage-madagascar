@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voyage Madagascar - Réservation en ligne</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0; padding: 0;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      scroll-behavior: smooth;
+      background: #f5f7fb;
+    }
+    .navbar {
+      background: rgba(20, 30, 4k8, 0.8);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    .navbar-brand {
+      font-size: 1.6rem; font-weight: 700; letter-spacing: 1px;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-link { font-weight: 500; transition: 0.3s; }
+    .nav-link:hover { color: #ff6b6b !important; }
+
+    .hero {
+      background: url('images/hero-bg.jpg') no-repeat center center/cover;
+      height: 100vh; min-height: 600px; position: relative;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white;
+    }
+    .hero-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background: linear-gradient(135deg, rgba(20,30,48,0.8) 0%, rgba(20,30,48,0.4) 100%);
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 800px; padding: 0 20px; }
+    .hero-content h1 { font-size: 4rem; font-weight: 800; text-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 1rem; letter-spacing: -1px; }
+    .hero-content p.lead { font-size: 1.8rem; font-weight: 300; text-shadow: 0 2px 10px rgba(0,0,0,0.6); margin-bottom: 2rem; }
+    .btn-reserver {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white; padding: 16px 50px; font-size: 1.4rem; font-weight: 600;
+      border-radius: 50px; border: none; transition: 0.3s ease;
+      box-shadow: 0 8px 25px rgba(255,107,107,0.5);
+      text-transform: uppercase; letter-spacing: 2px; text-decoration: none; display: inline-block;
+    }
+    .btn-reserver:hover {
+      background: linear-gradient(135deg, #ee5a24, #ff6b6b);
+      transform: translateY(-4px); box-shadow: 0 15px 35px rgba(255,107,107,0.7); color: white;
+    }
+
+    .cards-section { padding: 80px 0; background: #ffffff; }
+    .cards-section h2 { font-weight: 700; color: #141e30; }
+    .card {
+      border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s; overflow: hidden;
+    }
+    .card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .card-img-top { height: 220px; object-fit: cover; }
+    .card-body { padding: 2rem; text-align: center; }
+    .card-title { font-weight: 700; color: #141e30; margin-bottom: 1rem; }
+    .card-text { color: #555; font-size: 1rem; }
+
+    .search-section { padding: 80px 0; background: #f5f7fb; }
+    .search-section h2 { font-weight: 700; color: #141e30; }
+    .form-control, .form-select {
+      border-radius: 30px; padding: 12px 20px; border: 1px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      border: none; border-radius: 30px; font-weight: 600;
+    }
+
+    /* Plan de sièges */
+    .plan-sieges {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .rangee-sieges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .groupe-gauche, .groupe-droite {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .allee {
+      width: 50px;
+    }
+    .siege {
+      width: 44px; height: 44px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      transition: 0.2s;
+    }
+    .siege.disponible {
+      background: #e8f5e9; color: #2e7d32;
+      border: 2px solid #a5d6a7;
+    }
+    .siege.disponible:hover { background: #c8e6c9; }
+    .siege.selectionne {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white; border: none;
+    }
+    .siege.occupe {
+      background: #ffebee; color: #b71c1c;
+      border: 2px solid #ef9a9a; cursor: not-allowed;
+    }
+
+    .volant-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    /* Footer */
+    footer {
+      background: #141e30;
+      color: rgba(255,255,255,0.8);
+      padding: 25px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    footer a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
+    footer a i {
+      font-size: 1.3rem;
+    }
+    footer a:hover {
+      color: #ff6b6b;
+    }
+
+    .modal-content {
+      border: none; border-radius: 25px; overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+      background: linear-gradient(145deg, #ffffff 0%, #f8f9fc 100%);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white; border-bottom: none; padding: 1.5rem 2rem;
+    }
+    .modal-header .modal-title {
+      font-weight: 700; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .modal-header .btn-close { filter: brightness(0) invert(1); }
+    .modal-body { padding: 2rem; background: #fafbfd; }
+    #contactModal .modal-body .contact-info {
+      background: white; border-radius: 15px; padding: 1.5rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 1rem;
+    }
+    #contactModal .modal-body i { color: #ff6b6b; font-size: 1.2rem; }
+
+    @media (max-width: 768px) {
+      .hero-content h1 { font-size: 2.8rem; }
+      .hero-content p.lead { font-size: 1.2rem; }
+      .btn-reserver { padding: 12px 35px; font-size: 1.1rem; }
+      footer { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">✨ Voyage Madagascar</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" href="#">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#historiqueModal">Historique</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Voyagez à travers Madagascar</h1>
+    <p class="lead">Réservation simple, rapide et sécurisée pour tous vos déplacements dans la Grande Île</p>
+    <a href="#search" class="btn btn-reserver">Réserver maintenant</a>
+  </div>
+</section>
+
+<!-- Cartes -->
+<section class="cards-section">
+  <div class="container">
+    <h2 class="text-center mb-5">Pourquoi choisir Voyage Madagascar ?</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100">
+          <img src="images/card1.jpg" class="card-img-top" alt="Choix de sièges">
+          <div class="card-body">
+            <h5 class="card-title">Choix de sièges</h5>
+            <p class="card-text">Sélectionnez votre place préférée pour voyager confortablement.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100">
+          <img src="images/card2.jpg" class="card-img-top" alt="Villes desservies">
+          <div class="card-body">
+            <h5 class="card-title">Villes desservies</h5>
+            <p class="card-text">Des liaisons vers toutes les grandes villes de Madagascar.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100">
+          <img src="images/card3.jpg" class="card-img-top" alt="Paiement sécurisé">
+          <div class="card-body">
+            <h5 class="card-title">Paiement sécurisé</h5>
+            <p class="card-text">Transactions protégées pour une tranquillité d'esprit totale.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recherche -->
+<section id="search" class="search-section">
+  <div class="container">
+    <h2 class="text-center mb-4">Rechercher un trajet</h2>
+    <form id="formRecherche" class="row g-3 justify-content-center mb-5">
+      <div class="col-md-3">
+        <input type="text" class="form-control" id="depart" placeholder="Ville de départ" required>
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" id="destination" placeholder="Destination" required>
+      </div>
+      <div class="col-md-3">
+        <input type="date" class="form-control" id="date" required>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>Rechercher</button>
+      </div>
+    </form>
+    <div id="resultatsTrajets" class="row"></div>
+  </div>
+</section>
+
+<!-- Modal Réservation -->
+<div class="modal fade" id="reservationModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-geo-alt-fill"></i> Choisissez vos sièges</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="planSieges" class="plan-sieges text-center mb-3"></div>
+        <form id="formReservation">
+          <input type="hidden" id="trajetId">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nom complet</label>
+              <input type="text" class="form-control" id="clientNom" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" id="clientEmail" required>
+            </div>
+          </div>
+          <div class="alert alert-info">Sièges sélectionnés : <span id="siegesTexte">Aucun</span></div>
+          <button type="submit" class="btn btn-success">Confirmer la réservation</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Historique -->
+<div class="modal fade" id="historiqueModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-clock-history"></i> Historique de vos réservations</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <input type="email" class="form-control" id="emailHistorique" placeholder="Votre email">
+          <button class="btn btn-primary mt-2" id="chargerHistorique">Afficher</button>
+        </div>
+        <div id="contenuHistorique"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal À propos -->
+<div class="modal fade" id="aproposModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-info-circle-fill"></i> À propos de Voyage Madagascar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Voyage Madagascar est une plateforme en ligne dédiée à la réservation de trajets en taxi‑brousse à travers toute la Grande Île.</p>
+        <p>Notre service, fiable et rapide, vous permet de choisir votre itinéraire, de sélectionner votre siège et de confirmer votre voyage en quelques clics.</p>
+        <p>Nous collaborons avec des chauffeurs expérimentés qui garantissent votre sécurité sur toutes les routes malgaches.</p>
+        <p>Le site couvre les principales destinations nationales avec des tarifs transparents affichés en Ariary.</p>
+        <p>Notre équipe reste à votre écoute et améliore constamment la plateforme grâce à vos retours.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Contact -->
+<div class="modal fade" id="contactModal" tabindex="-1">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-lines-fill"></i> Contact</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="contact-info">
+          <p class="mb-2"><i class="bi bi-person-fill me-2"></i><strong>Nom :</strong> RABENJASOA</p>
+          <p class="mb-2"><i class="bi bi-person me-2"></i><strong>Prénom :</strong> Christian</p>
+          <p class="mb-2"><i class="bi bi-envelope-fill me-2"></i><strong>Email :</strong> <a href="mailto:rachris533@gmail.com">rachris533@gmail.com</a></p>
+          <p class="mb-0"><i class="bi bi-telephone-fill me-2"></i><strong>Téléphone :</strong> <a href="tel:+261385199792">+261 38 51 997 92</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer sans Facebook -->
+<footer>
+  <a data-bs-toggle="modal" data-bs-target="#contactModal" href="#" title="Contact">
+    <i class="bi bi-telephone-fill"></i> Contact
+  </a>
+  <a data-bs-toggle="modal" data-bs-target="#aproposModal" href="#" title="À propos">
+    <i class="bi bi-info-circle-fill"></i> À propos
+  </a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = '/api';
+
+  let trajetActuel = null;
+  let siegesSelectionnes = [];
+  let derniereRecherche = { depart: '', destination: '', date: '' };
+
+  document.getElementById('formRecherche').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const depart = document.getElementById('depart').value.trim();
+    const destination = document.getElementById('destination').value.trim();
+    const date = document.getElementById('date').value;
+    derniereRecherche = { depart, destination, date };
+    await rechercherEtAfficher();
+  });
+
+  async function rechercherEtAfficher() {
+    const { depart, destination, date } = derniereRecherche;
+    try {
+      const response = await fetch(`${API_BASE}/trajets?depart=${encodeURIComponent(depart)}&destination=${encodeURIComponent(destination)}&date=${date}`);
+      const trajets = await response.json();
+      afficherTrajets(trajets);
+    } catch (error) {
+      alert('Erreur de connexion au serveur');
+    }
+  }
+
+  function afficherTrajets(trajets) {
+    const container = document.getElementById('resultatsTrajets');
+    container.innerHTML = '';
+    if (trajets.length === 0) {
+      container.innerHTML = '<p class="text-center">Aucun trajet trouvé.</p>';
+      return;
+    }
+    trajets.forEach(t => {
+      const placesRestantes = t.places_restantes !== undefined ? t.places_restantes : t.places_total;
+      container.innerHTML += `
+        <div class="col-md-4 mb-3">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">${t.depart} → ${t.destination}</h5>
+              <p class="card-text">${new Date(t.date).toLocaleDateString('fr-FR')} à ${t.heure}</p>
+              <p class="fw-bold text-primary">Prix du voyage : ${t.prix} Ar</p>
+              <p class="text-muted">${placesRestantes} place(s) restante(s)</p>
+              <button class="btn btn-primary w-100" onclick="ouvrirReservation(${t.id})" ${placesRestantes === 0 ? 'disabled' : ''}>${placesRestantes === 0 ? 'Complet' : 'Réserver'}</button>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  async function ouvrirReservation(trajetId) {
+    trajetActuel = trajetId;
+    siegesSelectionnes = [];
+
+    const response = await fetch(`${API_BASE}/trajets/${trajetId}/sieges`);
+    const siegesOccupes = await response.json();
+
+    const planDiv = document.getElementById('planSieges');
+    planDiv.innerHTML = '<h6 class="mb-3">Plan des sièges (22 places)</h6>';
+
+    for (let row = 0; row < 5; row++) {
+      const base = row * 4 + 1;
+      const rangeeDiv = document.createElement('div');
+      rangeeDiv.className = 'rangee-sieges';
+
+      const groupeGauche = document.createElement('div');
+      groupeGauche.className = 'groupe-gauche';
+      for (let i = 0; i < 2; i++) {
+        const num = base + i;
+        groupeGauche.appendChild(createSiegeElement(num, siegesOccupes));
+      }
+
+      const allee = document.createElement('div');
+      allee.className = 'allee';
+
+      const groupeDroite = document.createElement('div');
+      groupeDroite.className = 'groupe-droite';
+      for (let i = 2; i < 4; i++) {
+        const num = base + i;
+        groupeDroite.appendChild(createSiegeElement(num, siegesOccupes));
+      }
+
+      rangeeDiv.appendChild(groupeGauche);
+      rangeeDiv.appendChild(allee);
+      rangeeDiv.appendChild(groupeDroite);
+      planDiv.appendChild(rangeeDiv);
+    }
+
+    const derniereRangee = document.createElement('div');
+    derniereRangee.className = 'rangee-sieges';
+
+    const dernierGroupeGauche = document.createElement('div');
+    dernierGroupeGauche.className = 'groupe-gauche';
+    dernierGroupeGauche.appendChild(createSiegeElement(21, siegesOccupes));
+    dernierGroupeGauche.appendChild(createSiegeElement(22, siegesOccupes));
+
+    const alleeFinale = document.createElement('div');
+    alleeFinale.className = 'allee';
+
+    const groupeVolant = document.createElement('div');
+    groupeVolant.className = 'groupe-droite';
+    const imgVolant = document.createElement('img');
+    imgVolant.src = 'images/volant.png';
+    imgVolant.alt = 'Volant';
+    imgVolant.className = 'volant-img';
+    groupeVolant.appendChild(imgVolant);
+
+    derniereRangee.appendChild(dernierGroupeGauche);
+    derniereRangee.appendChild(alleeFinale);
+    derniereRangee.appendChild(groupeVolant);
+    planDiv.appendChild(derniereRangee);
+
+    document.getElementById('trajetId').value = trajetId;
+    document.getElementById('clientNom').value = '';
+    document.getElementById('clientEmail').value = '';
+    document.getElementById('siegesTexte').textContent = 'Aucun';
+
+    new bootstrap.Modal(document.getElementById('reservationModal')).show();
+  }
+
+  function createSiegeElement(num, siegesOccupes) {
+    const btn = document.createElement('span');
+    btn.className = 'siege';
+    btn.textContent = num;
+    if (siegesOccupes.includes(num)) {
+      btn.classList.add('occupe');
+      btn.onclick = null;
+    } else {
+      btn.classList.add('disponible');
+      btn.addEventListener('click', () => toggleSiege(num, btn));
+    }
+    return btn;
+  }
+
+  function toggleSiege(num, element) {
+    const index = siegesSelectionnes.indexOf(num);
+    if (index > -1) {
+      siegesSelectionnes.splice(index, 1);
+      element.classList.remove('selectionne');
+    } else {
+      siegesSelectionnes.push(num);
+      element.classList.add('selectionne');
+    }
+    document.getElementById('siegesTexte').textContent =
+      siegesSelectionnes.length ? siegesSelectionnes.join(', ') : 'Aucun';
+  }
+
+  document.getElementById('formReservation').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (siegesSelectionnes.length === 0) {
+      alert('Veuillez sélectionner au moins un siège.');
+      return;
+    }
+
+    const clientNom = document.getElementById('clientNom').value.trim();
+    const clientEmail = document.getElementById('clientEmail').value.trim();
+    const trajetId = document.getElementById('trajetId').value;
+
+    try {
+      const response = await fetch(`${API_BASE}/reservations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trajet_id: parseInt(trajetId),
+          sieges: siegesSelectionnes,
+          client_nom: clientNom,
+          client_email: clientEmail
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        alert(err.erreur || 'Erreur lors de la réservation');
+        return;
+      }
+
+      alert('Réservation confirmée !');
+      bootstrap.Modal.getInstance(document.getElementById('reservationModal')).hide();
+
+      if (derniereRecherche.depart && derniereRecherche.destination && derniereRecherche.date) {
+        await rechercherEtAfficher();
+      }
+    } catch (error) {
+      alert('Erreur réseau');
+    }
+  });
+
+  document.getElementById('chargerHistorique').addEventListener('click', async () => {
+    const email = document.getElementById('emailHistorique').value.trim();
+    if (!email) return alert('Veuillez entrer votre email');
+
+    const response = await fetch(`${API_BASE}/reservations/historique/${encodeURIComponent(email)}`);
+    const reservations = await response.json();
+
+    const contenu = document.getElementById('contenuHistorique');
+    if (reservations.length === 0) {
+      contenu.innerHTML = '<p>Aucune réservation trouvée.</p>';
+      return;
+    }
+
+    contenu.innerHTML = reservations.map(r => `
+      <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+          <h6>${r.depart} → ${r.destination}</h6>
+          <p class="mb-1">Le ${new Date(r.date).toLocaleDateString('fr-FR')} à ${r.heure}</p>
+          <p class="mb-1">Sièges : ${r.sieges.join(', ')}</p>
+          <span class="badge ${r.statut === 'confirmée' ? 'bg-success' : 'bg-danger'}">${r.statut}</span>
+        </div>
+      </div>
+    `).join('');
+  });
+</script>
+</body>
+</html>

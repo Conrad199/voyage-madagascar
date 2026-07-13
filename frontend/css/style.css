@@ -1,0 +1,38 @@
+body {
+    padding-top: 70px;
+    padding-bottom: 30px;
+}
+
+.siege {
+    width: 40px;
+    height: 40px;
+    margin: 3px;
+    border: 1px solid #ccc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.siege.disponible {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.siege.selectionne {
+    background-color: #007bff;
+    color: white;
+}
+
+.siege.occupe {
+    background-color: #f8d7da;
+    color: #721c24;
+    cursor: not-allowed;
+}
+
+.plan-sieges {
+    max-width: 400px;
+    margin: 0 auto;
+}
