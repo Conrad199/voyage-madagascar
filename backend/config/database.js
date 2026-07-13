@@ -63,12 +63,30 @@ async function createTables() {
     }
 }
 
-// Test de connexion et création des tables au démarrage
+// Insérer l'administrateur par défaut s'il n'existe pas
+async function initAdmin() {
+    try {
+        const [rows] = await pool.execute('SELECT id FROM admins WHERE email = ?', ['admin@voyage.mg']);
+        if (rows.length === 0) {
+            const bcrypt = require('bcryptjs');
+            const hash = await bcrypt.hash('admin123', 10);
+            await pool.execute('INSERT INTO admins (email, password_hash) VALUES (?, ?)', ['admin@voyage.mg', hash]);
+            console.log('✅ Admin par défaut créé (admin@voyage.mg / admin123)');
+        } else {
+            console.log('ℹ️ Admin déjà existant');
+        }
+    } catch (err) {
+        console.error('❌ Erreur initAdmin :', err.message);
+    }
+}
+
+// Test de connexion et initialisation au démarrage
 pool.getConnection()
     .then(async (conn) => {
         console.log('✅ Connecté à MySQL Aiven');
         conn.release();
         await createTables();
+        await initAdmin();
     })
     .catch(err => console.error('❌ Erreur DB :', err.message));
 
