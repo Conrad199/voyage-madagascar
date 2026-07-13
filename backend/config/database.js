@@ -2,8 +2,8 @@ const mysql = require('mysql2/promise');
 const fs = require('fs');
 require('dotenv').config();
 
-const db = mysql.createPool({
-    port: process.env.DB_PORT || 21699,
+const pool = mysql.createPool({
+    port: process.env.DB_PORT || 11563,
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'avnadmin',
     password: process.env.DB_PASSWORD || '',
@@ -16,17 +16,60 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-// Test de connexion (pratique mais pas obligatoire en production)
-db.getConnection()
-    .then(conn => {
+// Créer les tables si elles n'existent pas
+async function createTables() {
+    const queries = [
+        `CREATE TABLE IF NOT EXISTS trajets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            depart VARCHAR(100) NOT NULL,
+            destination VARCHAR(100) NOT NULL,
+            date DATE NOT NULL,
+            heure TIME NOT NULL,
+            prix DECIMAL(10,2) NOT NULL,
+            places_total INT NOT NULL DEFAULT 22
+        )`,
+        `CREATE TABLE IF NOT EXISTS reservations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            trajet_id INT NOT NULL,
+            client_nom VARCHAR(100) NOT NULL,
+            client_email VARCHAR(150) NOT NULL,
+            date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            statut VARCHAR(20) DEFAULT 'confirmée',
+            FOREIGN KEY (trajet_id) REFERENCES trajets(id)
+        )`,
+        `CREATE TABLE IF NOT EXISTS reservations_sieges (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            reservation_id INT NOT NULL,
+            siege_numero INT NOT NULL,
+            FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE
+        )`,
+        `CREATE TABLE IF NOT EXISTS admins (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(150) NOT NULL UNIQUE,
+            password_hash VARCHAR(255) NOT NULL
+        )`
+    ];
+
+    const connection = await pool.getConnection();
+    try {
+        for (const query of queries) {
+            await connection.execute(query);
+        }
+        console.log('✅ Tables vérifiées/créées avec succès');
+    } catch (err) {
+        console.error('❌ Erreur lors de la création des tables :', err);
+    } finally {
+        connection.release();
+    }
+}
+
+// Test de connexion et création des tables au démarrage
+pool.getConnection()
+    .then(async (conn) => {
         console.log('✅ Connecté à MySQL Aiven');
         conn.release();
+        await createTables();
     })
-    .catch(err => {
-    console.error('❌ Erreur DB complète :');
-    console.error(err);          // Affiche l'objet complet
-    if (err.code) console.error('Code erreur :', err.code);
-    if (err.sqlMessage) console.error('SQL Message :', err.sqlMessage);
-});
+    .catch(err => console.error('❌ Erreur DB :', err.message));
 
-module.exports = db;
+module.exports = pool;
