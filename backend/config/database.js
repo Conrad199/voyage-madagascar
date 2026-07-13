@@ -16,7 +16,6 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Créer les tables si elles n'existent pas
 async function createTables() {
     const queries = [
         `CREATE TABLE IF NOT EXISTS trajets (
@@ -63,24 +62,20 @@ async function createTables() {
     }
 }
 
-// Insérer l'administrateur par défaut s'il n'existe pas
 async function initAdmin() {
+    const bcrypt = require('bcryptjs');
+    const hash = await bcrypt.hash('admin123', 10);
     try {
-        const [rows] = await pool.execute('SELECT id FROM admins WHERE email = ?', ['admin@voyage.mg']);
-        if (rows.length === 0) {
-            const bcrypt = require('bcryptjs');
-            const hash = await bcrypt.hash('admin123', 10);
-            await pool.execute('INSERT INTO admins (email, password_hash) VALUES (?, ?)', ['admin@voyage.mg', hash]);
-            console.log('✅ Admin par défaut créé (admin@voyage.mg / admin123)');
-        } else {
-            console.log('ℹ️ Admin déjà existant');
-        }
+        await pool.execute(
+            'INSERT INTO admins (email, password_hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)',
+            ['admin@voyage.mg', hash]
+        );
+        console.log('✅ Admin créé/mis à jour avec succès');
     } catch (err) {
         console.error('❌ Erreur initAdmin :', err.message);
     }
 }
 
-// Test de connexion et initialisation au démarrage
 pool.getConnection()
     .then(async (conn) => {
         console.log('✅ Connecté à MySQL Aiven');
