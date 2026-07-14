@@ -63,16 +63,17 @@ async function createTables() {
 }
 
 async function initAdmin() {
-    const bcrypt = require('bcryptjs');
-    const hash = await bcrypt.hash('admin123', 10);
     try {
+        const bcrypt = require('bcryptjs');
+        const hash = await bcrypt.hash('admin123', 10);
+        console.log('🔐 Hash généré :', hash);
         await pool.execute(
             'INSERT INTO admins (email, password_hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)',
             ['admin@voyage.mg', hash]
         );
         console.log('✅ Admin créé/mis à jour avec succès');
     } catch (err) {
-        console.error('❌ Erreur initAdmin :', err.message);
+        console.error('❌ Erreur initAdmin :', err.message, err.stack);
     }
 }
 
