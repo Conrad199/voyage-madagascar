@@ -140,35 +140,83 @@ function imprimerListe() {
   window.print();
 }
 
-// ========== IMPRESSION TICKET ==========
+// ========== IMPRESSION TICKET (corrigée) ==========
 async function imprimerTicket(reservationId) {
   const response = await fetch(`${API_BASE}/reservations/admin`);
   const reservations = await response.json();
   const r = reservations.find(res => res.id === reservationId);
   if (!r) return alert('Réservation introuvable');
 
-  const ticketHTML = `
-    <div style="padding:20px; font-family: 'Courier New', monospace; max-width:400px; margin:auto; border:2px dashed #000; border-radius:10px;">
-      <h2 style="text-align:center; margin-bottom:10px;">🎫 TICKET DE VOYAGE</h2>
-      <hr>
-      <p><strong>N° Réservation :</strong> ${r.id}</p>
-      <p><strong>Passager :</strong> ${r.client_nom}</p>
-      <p><strong>Email :</strong> ${r.client_email}</p>
-      <p><strong>Trajet :</strong> ${r.depart} → ${r.destination}</p>
-      <p><strong>Date :</strong> ${new Date(r.date).toLocaleDateString('fr-FR')} à ${r.heure}</p>
-      <p><strong>Sièges :</strong> ${r.sieges.join(', ')}</p>
-      <p><strong>Statut :</strong> ${r.statut}</p>
-      <p><strong>Date de réservation :</strong> ${new Date(r.date_reservation).toLocaleString('fr-FR')}</p>
-      <hr>
-      <p style="text-align:center; font-size:12px;">Merci de votre confiance !<br>Voyage Madagascar</p>
-    </div>
-  `;
+  const printWindow = window.open('', '_blank', 'width=450,height=600');
 
-  const printContainer = document.getElementById('ticketPrint');
-  printContainer.innerHTML = ticketHTML;
-  printContainer.style.display = 'block';
-  window.print();
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Ticket - Voyage Madagascar</title>
+      <style>
+        body {
+          font-family: 'Courier New', monospace;
+          padding: 20px;
+          margin: 0;
+          color: #000;
+          background: #fff;
+        }
+        .ticket {
+          max-width: 400px;
+          margin: 0 auto;
+          border: 2px dashed #000;
+          border-radius: 10px;
+          padding: 20px;
+        }
+        .ticket h2 {
+          text-align: center;
+          margin-bottom: 15px;
+          font-size: 1.5rem;
+        }
+        .ticket hr {
+          border: none;
+          border-top: 1px dashed #000;
+          margin: 15px 0;
+        }
+        .ticket p {
+          margin: 8px 0;
+          font-size: 0.95rem;
+        }
+        .ticket .footer {
+          text-align: center;
+          font-size: 0.8rem;
+          margin-top: 15px;
+          color: #555;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <h2>🎫 TICKET DE VOYAGE</h2>
+        <hr>
+        <p><strong>N° Réservation :</strong> ${r.id}</p>
+        <p><strong>Passager :</strong> ${r.client_nom}</p>
+        <p><strong>Email :</strong> ${r.client_email}</p>
+        <p><strong>Trajet :</strong> ${r.depart} → ${r.destination}</p>
+        <p><strong>Date :</strong> ${new Date(r.date).toLocaleDateString('fr-FR')} à ${r.heure}</p>
+        <p><strong>Sièges :</strong> ${r.sieges.join(', ')}</p>
+        <p><strong>Statut :</strong> ${r.statut}</p>
+        <p><strong>Date de réservation :</strong> ${new Date(r.date_reservation).toLocaleString('fr-FR')}</p>
+        <hr>
+        <div class="footer">
+          Merci de votre confiance !<br>
+          Voyage Madagascar
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+
   setTimeout(() => {
-    printContainer.style.display = 'none';
-  }, 1000);
+    printWindow.print();
+  }, 500);
 }
